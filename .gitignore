@@ -10,3 +10,5 @@ dist/
 .ai/
 # NextWork AI Workspace files
 .agents/
+# Claude Code Workspace files
+.claude/
