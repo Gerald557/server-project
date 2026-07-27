@@ -12,3 +12,5 @@ dist/
 .agents/
 # Claude Code Workspace files
 .claude/
+# Windsurf AI Workspace files
+.windsurf/
