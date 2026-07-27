@@ -3,3 +3,8 @@ dist/
 *.log
 .env
 /src/generated/prisma
+
+# AI Editor files
+.cursor/
+.cursorrules
+.ai/
