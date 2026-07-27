@@ -2,3 +2,15 @@ node_modules/
 dist/
 *.log
 .env
+/src/generated/prisma
+
+# AI Editor files
+.cursor/
+.cursorrules
+.ai/
+# NextWork AI Workspace files
+.agents/
+# Claude Code Workspace files
+.claude/
+# Windsurf AI Workspace files
+.windsurf/
