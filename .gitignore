@@ -8,3 +8,5 @@ dist/
 .cursor/
 .cursorrules
 .ai/
+# NextWork AI Workspace files
+.agents/
