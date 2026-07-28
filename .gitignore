@@ -1,4 +1,10 @@
 node_modules/
 dist/
-*.log
 .env
+*.log
+
+# Ignore AI and editor settings
+.agents/
+.claude/
+.windsurf/
+.vscode/
