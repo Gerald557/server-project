@@ -1,16 +1,19 @@
-import express, { Request, Response } from 'express';
+import 'dotenv/config';
+import express from 'express';
+import userRoutes from './routes/user'; // Clean, simple import path!
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
-// Middleware to parse incoming JSON payloads
 app.use(express.json());
 
-// Basic health check endpoint
-app.get('/', (req: Request, res: Response) => {
+
+app.use('/users', userRoutes);
+
+app.get('/', (req, res) => {
   res.status(200).json({ message: "Server is running smoothly!" });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
