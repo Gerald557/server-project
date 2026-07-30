@@ -1,45 +1,41 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
-
+import { sendResponse } from '../utils/response';
+import bcrypt from 'bcrypt';
 
 export const createUser = async (req: Request, res: Response) => {
   try {
-   
     const email = req.body.email;
     const name = req.body.name;
-    const password = req.body.password;
-
     
-    if (!email || !password || !name) {
-      res.status(400).json({ error: "Please enter your email, password, and name!" });
+    const password = req.body.password || 'WelcomeTemporary123!';
+
+    if (!email || !name) {
+      sendResponse(res, 400, false, "Please enter both email and name!");
       return;
     }
 
-   
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await prisma.user.create({
       data: {
         email: email,
         name: name,
-        password: password
+        password: hashedPassword
       }
     });
 
-    
-    res.status(201).json(newUser);
+    sendResponse(res, 201, true, "User registered successfully!", newUser);
   } catch (error: any) {
-    
-    res.status(500).json({ error: error.message });
+    sendResponse(res, 500, false, error.message);
   }
 };
 
-
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    
     const users = await prisma.user.findMany();
-    
-    res.status(200).json(users);
+    sendResponse(res, 200, true, "Users retrieved successfully!", users);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    sendResponse(res, 500, false, error.message);
   }
 };

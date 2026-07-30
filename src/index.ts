@@ -3,7 +3,7 @@ import express from 'express';
 import userRoutes from './routes/user'; // Clean, simple import path!
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; 
 
 app.use(express.json());
 
