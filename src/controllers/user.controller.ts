@@ -8,7 +8,11 @@ export const createUser = async (req: Request, res: Response) => {
     const email = req.body.email;
     const name = req.body.name;
     
-    const password = req.body.password || 'WelcomeTemporary123!';
+    let password = req.body.password;
+
+    if (!password) {
+      password = "temp_" + Math.random().toString(36).substring(2, 10);
+    }
 
     if (!email || !name) {
       sendResponse(res, 400, false, "Please enter both email and name!");
@@ -25,7 +29,13 @@ export const createUser = async (req: Request, res: Response) => {
       }
     });
 
-    sendResponse(res, 201, true, "User registered successfully!", newUser);
+    sendResponse(
+      res, 
+      201, 
+      true, 
+      "User registered successfully!", 
+      newUser
+    );
   } catch (error: any) {
     sendResponse(res, 500, false, error.message);
   }
