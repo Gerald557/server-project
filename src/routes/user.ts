@@ -3,12 +3,14 @@ import {
   createUser, 
   getUsers, 
   loginUser, 
-  resetPassword 
+  resetPassword,
+  forgotPassword
 } from '../controllers/user.controller';
 
 const router = Router();
 
-// Register all user endpoints
+router.post('/forgot-password', forgotPassword);
+
 router.post('/', createUser);
 router.get('/', getUsers);
 router.post('/login', loginUser);
