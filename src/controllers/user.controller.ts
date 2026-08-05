@@ -54,7 +54,8 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
-export const loginUser = async (req: Request, res: Response) => {
+// 1. Function name changed to PascalCase: LoginUser
+export const LoginUser = async (req: Request, res: Response) => {
   try {
     const email = req.body.email;
     const password = req.body.password;
@@ -73,15 +74,17 @@ export const loginUser = async (req: Request, res: Response) => {
       return;
     }
 
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    // 2. Variable name changed to snake_case: is_password_match
+    const is_password_match = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordMatch) {
+    if (!is_password_match) {
       sendResponse(res, 401, false, "Invalid email or password!");
       return;
     }
-        const token = jwt.sign(
+
+    const token = jwt.sign(
       { id: user.id, email: user.email },
-      process.env.JWT_SECRET || "fallback_secret",
+      JWT_SECRET,
       { expiresIn: "1d" }
     );
 
@@ -96,23 +99,26 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
-export const resetPassword = async (req: Request, res: Response) => {
+
+// 1. Function name changed to PascalCase: ResetPassword
+export const ResetPassword = async (req: Request, res: Response) => {
   try {
     const token = req.body.token || req.query.token;
-    const newPassword = req.body.newPassword;
+    const new_password = req.body.newPassword;
 
-    if (!token || !newPassword) {
+    if (!token || !new_password) {
       sendResponse(res, 400, false, "Token and new password are required!");
       return;
     }
 
     const decoded = jwt.verify(token as string, JWT_SECRET) as { id: string };
 
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    // 2. Variable name changed to snake_case: hashed_new_password
+    const hashed_new_password = await bcrypt.hash(new_password, 10);
 
     await prisma.user.update({
       where: { id: decoded.id },
-      data: { password: hashedNewPassword }
+      data: { password: hashed_new_password }
     });
 
     sendResponse(res, 200, true, "Password reset successfully!");
@@ -121,7 +127,9 @@ export const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
-export const forgotPassword = async (req: Request, res: Response) => {
+
+// 1. Function name changed to PascalCase: ForgotPassword
+export const ForgotPassword = async (req: Request, res: Response) => {
   try {
     const email = req.body.email;
 
@@ -139,7 +147,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
       return;
     }
 
-    const resetToken = jwt.sign(
+    // 2. Variable name changed to snake_case: reset_token
+    const reset_token = jwt.sign(
       { id: user.id },
       JWT_SECRET,
       { expiresIn: "15m" }
@@ -155,13 +164,15 @@ export const forgotPassword = async (req: Request, res: Response) => {
       },
     });
 
-    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+    // 3. Variable names changed to snake_case: app_url and reset_url
+    const app_url = process.env.APP_URL || "http://localhost:3000";
+    const reset_url = `${app_url}/reset-password?token=${reset_token}`;
     
     await transporter.sendMail({
       from: '"Task Manager API" <noreply@taskmanager.com>',
       to: user.email,
       subject: "Password Reset Request",
-      html: `<p>You requested a password reset. Click <a href="${resetUrl}">here</a> to reset your password. This link will expire in 15 minutes.</p>`
+      html: `<p>You requested a password reset. Click <a href="${reset_url}">here</a> to reset your password. This link will expire in 15 minutes.</p>`
     });
 
     sendResponse(res, 200, true, "Reset link sent to your email!");
