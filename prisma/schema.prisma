@@ -13,3 +13,15 @@ model User {
   password  String
   createdAt DateTime @default(now())
 }
+
+model Machine {
+  id               String   @id @default(uuid())
+  name             String
+  type             String  
+  serial_number    String   @unique
+  location         String 
+  status           String   @default("OPERATIONAL") 
+  created_by_id    String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
