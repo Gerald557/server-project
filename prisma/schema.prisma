@@ -7,7 +7,7 @@ generator client {
 }
 
 model User {
-  id        String   @id @default(uuid())
+ id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String
   password  String
@@ -21,7 +21,27 @@ model Machine {
   serial_number    String   @unique
   location         String 
   status           String   @default("OPERATIONAL") 
-  created_by_id    String?
+  created_by_id    Int?
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
+}
+
+model Inspection {
+  id           Int      @id @default(autoincrement())
+  machine_id   Int     
+  inspector_id Int      
+  result       String   
+  notes        String   
+  created_at   DateTime @default(now())
+}
+
+model Fault {
+  id                 Int      @id @default(autoincrement())
+  machine_id         Int     
+  fault_description  String   
+  severity           String  
+  reported_by_id     Int      
+  recommended_action String   
+  status             String   @default("open")
+  created_at         DateTime @default(now())
 }

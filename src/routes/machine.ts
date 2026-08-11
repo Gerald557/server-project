@@ -1,9 +1,11 @@
 
 import { Router } from 'express';
-import { CreateMachine } from '../controllers/machine.controller';
+import { CreateMachine, GetMachines } from '../controllers/machine.controller';
+import { verifyToken } from '../middlewares/auth';
 
 const router = Router();
 
-router.post('/', CreateMachine);
+router.post('/', verifyToken, CreateMachine);
+router.get('/', GetMachines);
 
 export default router;

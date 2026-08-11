@@ -12,14 +12,10 @@ export const createUser = async (req: Request, res: Response) => {
     const email = req.body.email;
     const name = req.body.name;
     
-    let password = req.body.password;
+    const password = req.body.password;
 
-    if (!password) {
-      password = "temp_" + Math.random().toString(36).substring(2, 10);
-    }
-
-    if (!email || !name) {
-      sendResponse(res, 400, false, "Please enter both email and name!");
+    if (!email || !name || !password) {
+      sendResponse(res, 400, false, "Please enter email, name, and password!");
       return;
     }
 
@@ -30,14 +26,20 @@ export const createUser = async (req: Request, res: Response) => {
         email: email,
         name: name,
         password: hashedPassword
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true
       }
     });
 
     sendResponse(
-      res, 
-      201, 
-      true, 
-      "User registered successfully!", 
+      res,
+      201,
+      true,
+      "User registered successfully!",
       newUser
     );
   } catch (error: any) {
@@ -47,7 +49,14 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const users = await prisma.user.findMany();
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true
+      }
+    });
     sendResponse(res, 200, true, "Users retrieved successfully!", users);
   } catch (error: any) {
     sendResponse(res, 500, false, error.message);
@@ -57,8 +66,8 @@ export const getUsers = async (req: Request, res: Response) => {
 // 1. Function name changed to PascalCase: LoginUser
 export const LoginUser = async (req: Request, res: Response) => {
   try {
-    const email = req.body.email;
-    const password = req.body.password;
+    const email = typeof req.body.email === 'string' ? req.body.email.trim() : '';
+    const password = typeof req.body.password === 'string' ? req.body.password : '';
 
     if (!email || !password) {
       sendResponse(res, 400, false, "Please enter your email and password!");
@@ -66,7 +75,7 @@ export const LoginUser = async (req: Request, res: Response) => {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: email }
+      where: { email }
     });
 
     if (!user) {
@@ -111,7 +120,7 @@ export const ResetPassword = async (req: Request, res: Response) => {
       return;
     }
 
-    const decoded = jwt.verify(token as string, JWT_SECRET) as { id: string };
+    const decoded = jwt.verify(token as string, JWT_SECRET) as { id:  any };
 
     // 2. Variable name changed to snake_case: hashed_new_password
     const hashed_new_password = await bcrypt.hash(new_password, 10);
@@ -131,7 +140,7 @@ export const ResetPassword = async (req: Request, res: Response) => {
 // 1. Function name changed to PascalCase: ForgotPassword
 export const ForgotPassword = async (req: Request, res: Response) => {
   try {
-    const email = req.body.email;
+    const email = typeof req.body.email === 'string' ? req.body.email.trim() : '';
 
     if (!email) {
       sendResponse(res, 400, false, "Please enter your email!");
@@ -139,7 +148,7 @@ export const ForgotPassword = async (req: Request, res: Response) => {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: email }
+      where: { email }
     });
 
     if (!user) {
