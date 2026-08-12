@@ -12,10 +12,11 @@ model User {
   name      String
   password  String
   createdAt DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Machine {
-  id               String   @id @default(uuid())
+  id               Int      @id @default(autoincrement())
   name             String
   type             String  
   serial_number    String   @unique
@@ -33,6 +34,7 @@ model Inspection {
   result       String   
   notes        String   
   created_at   DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Fault {
@@ -44,4 +46,5 @@ model Fault {
   recommended_action String   
   status             String   @default("open")
   created_at         DateTime @default(now())
+  updated_at DateTime @updatedAt
 }

@@ -55,3 +55,37 @@ export const GetMachines = async (req: Request, res: Response) => {
     sendResponse(res, 500, false, error.message);
   }
 };
+
+export const UpdateMachine = async (req: Request, res: Response) => {
+  try {
+const parsed_id = parseInt(req.params.id as string);
+
+    if (isNaN(parsed_id)) {
+      sendResponse(res, 400, false, "Invalid machine ID!");
+      return;
+    }
+    const existing_machine = await prisma.machine.findUnique({
+      where: { id: parsed_id }
+    });
+
+    if (!existing_machine) {
+      sendResponse(res, 404, false, "Machine not found!");
+      return;
+    }
+    const { name, type, serial_number, location, status } = req.body;
+    const updated_machine = await prisma.machine.update({
+      where: { id: parsed_id },
+      data: {
+        name: name !== undefined ? name : existing_machine.name,
+        type: type !== undefined ? type : existing_machine.type,
+        serial_number: serial_number !== undefined ? serial_number : existing_machine.serial_number,
+        location: location !== undefined ? location : existing_machine.location,
+        status: status !== undefined ? status : existing_machine.status
+      }
+    });
+
+    sendResponse(res, 200, true, "Machine updated successfully!", updated_machine);
+  } catch (error: any) {
+    sendResponse(res, 500, false, error.message);
+  }
+};
