@@ -24,7 +24,8 @@ export const CreateMachine = async (req: Request, res: Response) => {
         type,
         serial_number,
         location,
-        created_by_id: staff_id
+        created_by_id: staff_id,
+        updated_at: new Date()
       }
     });
 

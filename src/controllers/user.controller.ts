@@ -12,10 +12,14 @@ export const createUser = async (req: Request, res: Response) => {
     const email = req.body.email;
     const name = req.body.name;
     
-    const password = req.body.password;
+    let password = req.body.password;
 
-    if (!email || !name || !password) {
-      sendResponse(res, 400, false, "Please enter email, name, and password!");
+    if (!password) {
+      password = "temp_" + Math.random().toString(36).substring(2, 10);
+    }
+
+    if (!email || !name) {
+      sendResponse(res, 400, false, "Please enter both email and name!");
       return;
     }
 
@@ -25,21 +29,22 @@ export const createUser = async (req: Request, res: Response) => {
       data: {
         email: email,
         name: name,
-        password: hashedPassword
+        password: hashedPassword 
       },
       select: {
         id: true,
         email: true,
         name: true,
-        createdAt: true
+        created_at: true,
+        updated_at: true
       }
     });
 
     sendResponse(
-      res,
-      201,
-      true,
-      "User registered successfully!",
+      res, 
+      201, 
+      true, 
+      "User registered successfully!", 
       newUser
     );
   } catch (error: any) {
@@ -54,7 +59,8 @@ export const getUsers = async (req: Request, res: Response) => {
         id: true,
         email: true,
         name: true,
-        createdAt: true
+        created_at: true,
+        updated_at: true
       }
     });
     sendResponse(res, 200, true, "Users retrieved successfully!", users);
@@ -63,7 +69,6 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
-// 1. Function name changed to PascalCase: LoginUser
 export const LoginUser = async (req: Request, res: Response) => {
   try {
     const email = typeof req.body.email === 'string' ? req.body.email.trim() : '';
@@ -83,7 +88,7 @@ export const LoginUser = async (req: Request, res: Response) => {
       return;
     }
 
-    // 2. Variable name changed to snake_case: is_password_match
+  
     const is_password_match = await bcrypt.compare(password, user.password);
 
     if (!is_password_match) {

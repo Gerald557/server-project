@@ -50,3 +50,44 @@ export const GetInspections = async (req: Request, res: Response) => {
     sendResponse(res, 500, false, error.message);
   }
 };
+
+export const UpdateInspection = async (req: Request, res: Response) => {
+  try {
+    const parsed_id = parseInt(req.params.id as string);
+
+    if (isNaN(parsed_id)) {
+      sendResponse(res, 400, false, "Invalid inspection ID!");
+      return;
+    }
+
+    const existing_inspection = await prisma.inspection.findUnique({
+      where: { id: parsed_id }
+    });
+
+    if (!existing_inspection) {
+      sendResponse(res, 404, false, "Inspection record not found!");
+      return;
+    }
+
+    const { result, notes } = req.body;
+
+    const updated_inspection = await prisma.inspection.update({
+      where: { id: parsed_id },
+      data: {
+        result: result !== undefined ? result : existing_inspection.result,
+        notes: notes !== undefined ? notes : existing_inspection.notes,
+        updated_at: new Date()
+      }
+    });
+
+    sendResponse(
+      res, 
+      200, 
+      true, 
+      "Inspection updated successfully!", 
+      updated_inspection
+    );
+  } catch (error: any) {
+    sendResponse(res, 500, false, error.message);
+  }
+};
