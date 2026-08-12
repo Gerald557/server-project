@@ -81,7 +81,8 @@ const parsed_id = parseInt(req.params.id as string);
         type: type !== undefined ? type : existing_machine.type,
         serial_number: serial_number !== undefined ? serial_number : existing_machine.serial_number,
         location: location !== undefined ? location : existing_machine.location,
-        status: status !== undefined ? status : existing_machine.status
+        status: status !== undefined ? status : existing_machine.status,
+        updated_at: new Date()
       }
     });
 

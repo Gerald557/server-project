@@ -1,4 +1,3 @@
-
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { sendResponse } from '../utils/response';
@@ -11,12 +10,13 @@ export const CreateInspection = async (req: Request, res: Response) => {
       sendResponse(res, 400, false, "Please enter the machine ID, result, and notes!");
       return;
     }
+    const parsed_machine_id = typeof machine_id === 'string' ? parseInt(machine_id) : machine_id;
 
     const inspector_id = (req as any).user.id;
 
-    const new_inspection = await (prisma as any).inspection.create({
+    const new_inspection = await prisma.inspection.create({
       data: {
-        machine_id,
+        machine_id: parsed_machine_id,
         inspector_id,
         result,
         notes
@@ -37,7 +37,7 @@ export const CreateInspection = async (req: Request, res: Response) => {
 
 export const GetInspections = async (req: Request, res: Response) => {
   try {
-    const all_inspections = await (prisma as any).inspection.findMany();
+ const all_inspections = await prisma.inspection.findMany();
 
     sendResponse(
       res, 
