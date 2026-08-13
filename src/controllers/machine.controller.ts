@@ -2,15 +2,17 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { sendResponse } from '../utils/response';
+import { createMachineSchema } from '../validators/machine.validator';
 
 export const CreateMachine = async (req: Request, res: Response) => {
   try {
-    const { name, type, serial_number, location } = req.body;
-
-    if (!name || !type || !serial_number || !location) {
-      sendResponse(res, 400, false, "Please enter all required machine details!");
+    const scan_result = createMachineSchema.safeParse(req.body);
+    if (!scan_result.success) {
+      const first_error_message = scan_result.error.issues[0].message;
+      sendResponse(res, 400, false, first_error_message);
       return;
     }
+    const { name, type, serial_number, location } = scan_result.data;
 
     const staff_id = (req as any).user?.id;
     if (!staff_id) {
@@ -33,7 +35,7 @@ export const CreateMachine = async (req: Request, res: Response) => {
       res, 
       201, 
       true, 
-      "Machine registered securely!", 
+      "Machine registered securely with schema validation!", 
       new_machine
     );
   } catch (error: any) {
@@ -44,14 +46,7 @@ export const CreateMachine = async (req: Request, res: Response) => {
 export const GetMachines = async (req: Request, res: Response) => {
   try {
     const registered_machines = await prisma.machine.findMany();
-
-    sendResponse(
-      res, 
-      200, 
-      true, 
-      "Machines retrieved successfully!", 
-      registered_machines
-    );
+    sendResponse(res, 200, true, "Machines retrieved successfully!", registered_machines);
   } catch (error: any) {
     sendResponse(res, 500, false, error.message);
   }
@@ -59,12 +54,12 @@ export const GetMachines = async (req: Request, res: Response) => {
 
 export const UpdateMachine = async (req: Request, res: Response) => {
   try {
-const parsed_id = parseInt(req.params.id as string);
-
+    const parsed_id = parseInt(req.params.id as string);
     if (isNaN(parsed_id)) {
       sendResponse(res, 400, false, "Invalid machine ID!");
       return;
     }
+
     const existing_machine = await prisma.machine.findUnique({
       where: { id: parsed_id }
     });
@@ -73,6 +68,7 @@ const parsed_id = parseInt(req.params.id as string);
       sendResponse(res, 404, false, "Machine not found!");
       return;
     }
+
     const { name, type, serial_number, location, status } = req.body;
     const updated_machine = await prisma.machine.update({
       where: { id: parsed_id },

@@ -29,14 +29,12 @@ export const createUser = async (req: Request, res: Response) => {
       data: {
         email: email,
         name: name,
-        password: hashedPassword 
+        password: hashedPassword
       },
       select: {
         id: true,
         email: true,
-        name: true,
-        created_at: true,
-        updated_at: true
+        name: true
       }
     });
 
@@ -58,9 +56,7 @@ export const getUsers = async (req: Request, res: Response) => {
       select: {
         id: true,
         email: true,
-        name: true,
-        created_at: true,
-        updated_at: true
+        name: true
       }
     });
     sendResponse(res, 200, true, "Users retrieved successfully!", users);
@@ -71,24 +67,22 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const LoginUser = async (req: Request, res: Response) => {
   try {
-    const email = typeof req.body.email === 'string' ? req.body.email.trim() : '';
-    const password = typeof req.body.password === 'string' ? req.body.password : '';
+    const email = req.body.email;
+    const password = req.body.password;
 
     if (!email || !password) {
       sendResponse(res, 400, false, "Please enter your email and password!");
       return;
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email }
+    const user = await prisma.user.findFirst({
+      where: { email: email }
     });
 
     if (!user) {
       sendResponse(res, 401, false, "Invalid email or password!");
       return;
-    }
-
-  
+    } 
     const is_password_match = await bcrypt.compare(password, user.password);
 
     if (!is_password_match) {
@@ -113,8 +107,6 @@ export const LoginUser = async (req: Request, res: Response) => {
   }
 };
 
-
-// 1. Function name changed to PascalCase: ResetPassword
 export const ResetPassword = async (req: Request, res: Response) => {
   try {
     const token = req.body.token || req.query.token;
@@ -125,9 +117,8 @@ export const ResetPassword = async (req: Request, res: Response) => {
       return;
     }
 
-    const decoded = jwt.verify(token as string, JWT_SECRET) as { id:  any };
+    const decoded = jwt.verify(token as string, JWT_SECRET) as { id: any };
 
-    // 2. Variable name changed to snake_case: hashed_new_password
     const hashed_new_password = await bcrypt.hash(new_password, 10);
 
     await prisma.user.update({
@@ -141,19 +132,17 @@ export const ResetPassword = async (req: Request, res: Response) => {
   }
 };
 
-
-// 1. Function name changed to PascalCase: ForgotPassword
 export const ForgotPassword = async (req: Request, res: Response) => {
   try {
-    const email = typeof req.body.email === 'string' ? req.body.email.trim() : '';
+    const email = req.body.email;
 
     if (!email) {
       sendResponse(res, 400, false, "Please enter your email!");
       return;
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email }
+    const user = await prisma.user.findFirst({
+      where: { email: email }
     });
 
     if (!user) {
@@ -161,7 +150,6 @@ export const ForgotPassword = async (req: Request, res: Response) => {
       return;
     }
 
-    // 2. Variable name changed to snake_case: reset_token
     const reset_token = jwt.sign(
       { id: user.id },
       JWT_SECRET,
@@ -178,15 +166,14 @@ export const ForgotPassword = async (req: Request, res: Response) => {
       },
     });
 
-    // 3. Variable names changed to snake_case: app_url and reset_url
     const app_url = process.env.APP_URL || "http://localhost:3000";
     const reset_url = `${app_url}/reset-password?token=${reset_token}`;
     
     await transporter.sendMail({
-      from: '"Task Manager API" <noreply@taskmanager.com>',
+      from: '"Task Manager API" ',
       to: user.email,
       subject: "Password Reset Request",
-      html: `<p>You requested a password reset. Click <a href="${reset_url}">here</a> to reset your password. This link will expire in 15 minutes.</p>`
+      html: `You requested a password reset. Click here to reset your password. This link will expire in 15 minutes.`
     });
 
     sendResponse(res, 200, true, "Reset link sent to your email!");
