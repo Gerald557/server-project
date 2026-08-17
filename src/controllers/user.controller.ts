@@ -19,7 +19,7 @@ export const createUser = async (req: Request, res: Response) => {
     }
 
     if (!email || !name) {
-      sendResponse(res, 400, false, "Please enter both email and name!");
+      sendResponse(res, 422, false, "Please enter both email and name!");
       return;
     }
 

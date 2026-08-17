@@ -39,12 +39,25 @@ model Inspection {
 
 model Fault {
   id                 Int      @id @default(autoincrement())
-  machine_id         Int     
+  machine_id         Int      
+  inspection_id      Int? 
   fault_description  String   
-  severity           String  
+  severity           String   
   reported_by_id     Int      
   recommended_action String   
-  status             String   @default("open")
+  status             String   @default("draft") 
   created_at         DateTime @default(now())
-  updated_at DateTime @updatedAt
+  updated_at         DateTime @updatedAt
+}
+
+model WorkOrder {
+  id             Int      @id @default(autoincrement())
+  machine_id     Int      
+  fault_id       Int?     
+  description    String   
+  assigned_to_id Int?     
+  status         String   @default("pending")
+  created_by_id  Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 }

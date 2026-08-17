@@ -7,7 +7,7 @@ export const CreateInspection = async (req: Request, res: Response) => {
     const { machine_id, result, notes } = req.body;
 
     if (!machine_id || !result || !notes) {
-      sendResponse(res, 400, false, "Please enter the machine ID, result, and notes!");
+      sendResponse(res, 422, false, "Please enter the machine ID, result, and notes!");
       return;
     }
     const parsed_machine_id = typeof machine_id === 'string' ? parseInt(machine_id) : machine_id;

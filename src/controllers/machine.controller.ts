@@ -6,10 +6,11 @@ import { create_machine_schema } from '../validators/machine.validator'
 
 export const CreateMachine = async (req: Request, res: Response) => {
   try {
-    const scan_result = create_machine_schema.safeParse(req.body);
+    const scan_result = create_machine_schema.safeParse(req.body)
     if (!scan_result.success) {
       const first_error_message = scan_result.error.issues[0].message;
-      sendResponse(res, 400, false, first_error_message);
+      // Changed status code from 400 to 422!
+      sendResponse(res, 422, false, first_error_message);
       return;
     }
     const { name, type, serial_number, location } = scan_result.data;
