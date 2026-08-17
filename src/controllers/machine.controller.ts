@@ -2,11 +2,11 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { sendResponse } from '../utils/response';
-import { createMachineSchema } from '../validators/machine.validator';
+import { create_machine_schema } from '../validators/machine.validator'
 
 export const CreateMachine = async (req: Request, res: Response) => {
   try {
-    const scan_result = createMachineSchema.safeParse(req.body);
+    const scan_result = create_machine_schema.safeParse(req.body);
     if (!scan_result.success) {
       const first_error_message = scan_result.error.issues[0].message;
       sendResponse(res, 400, false, first_error_message);

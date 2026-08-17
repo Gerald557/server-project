@@ -173,7 +173,7 @@ export const ForgotPassword = async (req: Request, res: Response) => {
       from: '"Task Manager API" ',
       to: user.email,
       subject: "Password Reset Request",
-      html: `You requested a password reset. Click here to reset your password. This link will expire in 15 minutes.`
+      html: `You requested a password reset. Click <a href="${reset_url}">here</a> to reset your password. This link will expire in 15 minutes.`
     });
 
     sendResponse(res, 200, true, "Reset link sent to your email!");

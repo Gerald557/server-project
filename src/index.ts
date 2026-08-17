@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.use(apiRouter);
+app.use("/api/v1", apiRouter);
 
 app.get('/', (req, res) => {
   res.status(200).json({ message: "Server is running smoothly!" });
