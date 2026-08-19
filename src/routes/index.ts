@@ -5,6 +5,7 @@ import inspectionRouter from './inspection';
 import faultRouter from './fault';
 import workOrderRouter from './work_order';
 import sparePartRouter from './spare_part';
+import invoiceRouter from './invoice';
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use('/inspections', inspectionRouter);
 router.use('/faults', faultRouter);
 router.use('/work-orders', workOrderRouter);
 router.use('/spare-parts', sparePartRouter);
+router.use('/invoices', invoiceRouter);
 
 export default router;

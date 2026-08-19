@@ -82,3 +82,14 @@ model WorkOrderPart {
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 }
+
+model Invoice {
+  id            Int      @id @default(autoincrement())
+  work_order_id Int      @unique 
+  labor_cost    Float    @default(100.0)
+  parts_cost    Float    
+  total_amount  Float    
+  status        String   @default("draft")
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
