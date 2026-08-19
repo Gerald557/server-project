@@ -7,9 +7,57 @@ generator client {
 }
 
 model User {
-  id        String   @id @default(uuid())
+ id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String
   password  String
   createdAt DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Machine {
+  id               Int      @id @default(autoincrement())
+  name             String
+  type             String  
+  serial_number    String   @unique
+  location         String 
+  status           String   @default("OPERATIONAL") 
+  created_by_id    Int?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+model Inspection {
+  id           Int      @id @default(autoincrement())
+  machine_id   Int     
+  inspector_id Int      
+  result       String   
+  notes        String   
+  created_at   DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Fault {
+  id                 Int      @id @default(autoincrement())
+  machine_id         Int      
+  inspection_id      Int? 
+  fault_description  String   
+  severity           String   
+  reported_by_id     Int      
+  recommended_action String   
+  status             String   @default("draft") 
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+}
+
+model WorkOrder {
+  id             Int      @id @default(autoincrement())
+  machine_id     Int      
+  fault_id       Int?     
+  description    String   
+  assigned_to_id Int?     
+  status         String   @default("pending")
+  created_by_id  Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 }

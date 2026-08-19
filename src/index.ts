@@ -1,14 +1,13 @@
 import 'dotenv/config';
 import express from 'express';
-import userRoutes from './routes/user'; // Clean, simple import path!
+import apiRouter from './routes';
 
 const app = express();
-const PORT = process.env.PORT || 3000; 
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-
-app.use('/users', userRoutes);
+app.use("/api/v1", apiRouter);
 
 app.get('/', (req, res) => {
   res.status(200).json({ message: "Server is running smoothly!" });
