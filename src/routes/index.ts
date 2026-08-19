@@ -4,6 +4,7 @@ import machineRouter from './machine';
 import inspectionRouter from './inspection';
 import faultRouter from './fault';
 import workOrderRouter from './work_order';
+import sparePartRouter from './spare_part';
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.use('/machines', machineRouter);
 router.use('/inspections', inspectionRouter);
 router.use('/faults', faultRouter);
 router.use('/work-orders', workOrderRouter);
+router.use('/spare-parts', sparePartRouter);
 
 export default router;

@@ -61,3 +61,24 @@ model WorkOrder {
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
 }
+
+
+model SparePart {
+  id                  Int      @id @default(autoincrement())
+  name                String   
+  part_number         String   @unique
+  quantity_in_stock   Int      
+  low_stock_threshold Int      @default(5)
+  unit_cost           Float    
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+}
+
+model WorkOrderPart {
+  id            Int      @id @default(autoincrement())
+  work_order_id Int      
+  spare_part_id Int      
+  quantity_used Int      
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
