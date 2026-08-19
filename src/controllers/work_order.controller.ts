@@ -2,6 +2,39 @@ import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { sendResponse } from '../utils/response';
 import { create_work_order_schema } from '../validators/work_order.validator';
+import nodemailer from 'nodemailer'; 
+
+const sendAssignmentEmail = async (email: string, name: string, description: string) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: '"Maintenance System" ',
+      to: email,
+      subject: "New Work Order Task Assigned",
+      html: `
+        Hello ${name},
+        You have been officially assigned to a new mechanical maintenance work order:
+        
+          "${description}"
+        
+        Please log into your panel to inspect the machine and update the work order status once you begin your repair.
+        Thank you!
+      `
+    });
+  } catch (error) {
+    console.error("Failed to send assignment email:", error);
+  }
+};
+
 
 export const CreateWorkOrder = async (req: Request, res: Response) => {
   try {
@@ -38,7 +71,7 @@ export const CreateWorkOrder = async (req: Request, res: Response) => {
 
     const creator_id = (req as any).user.id;
 
-    const new_work_order = await (prisma as any).workOrder.create({
+    const new_work_order = await prisma.workOrder.create({
       data: {
         machine_id,
         fault_id,
@@ -49,11 +82,20 @@ export const CreateWorkOrder = async (req: Request, res: Response) => {
       }
     });
 
+    if (assigned_to_id) {
+      const staff_user = await prisma.user.findFirst({
+        where: { id: assigned_to_id }
+      });
+      if (staff_user) {
+        await sendAssignmentEmail(staff_user.email, staff_user.name, description);
+      }
+    }
+
     sendResponse(
       res, 
       201, 
       true, 
-      "Work order issued successfully!", 
+      "Work order issued successfully and technician notified!", 
       new_work_order
     );
   } catch (error: any) {
@@ -61,17 +103,17 @@ export const CreateWorkOrder = async (req: Request, res: Response) => {
   }
 };
 
-// 2. Retrieve All Work Orders
+
 export const GetWorkOrders = async (req: Request, res: Response) => {
   try {
-    const all_work_orders = await (prisma as any).workOrder.findMany();
+    const all_work_orders = await prisma.workOrder.findMany();
     sendResponse(res, 200, true, "Work orders retrieved successfully!", all_work_orders);
   } catch (error: any) {
     sendResponse(res, 500, false, error.message);
   }
 };
 
-// 3. Update Status (e.g., pending -> assigned -> completed)
+
 export const UpdateWorkOrderStatus = async (req: Request, res: Response) => {
   try {
     const parsed_id = parseInt(req.params.id as string);
@@ -83,7 +125,7 @@ export const UpdateWorkOrderStatus = async (req: Request, res: Response) => {
 
     const { status, assigned_to_id } = req.body;
 
-    const existing_work_order = await (prisma as any).workOrder.findUnique({
+    const existing_work_order = await prisma.workOrder.findUnique({
       where: { id: parsed_id }
     });
 
@@ -92,7 +134,7 @@ export const UpdateWorkOrderStatus = async (req: Request, res: Response) => {
       return;
     }
 
-    const updated_work_order = await (prisma as any).workOrder.update({
+    const updated_work_order = await prisma.workOrder.update({
       where: { id: parsed_id },
       data: {
         status: status !== undefined ? status : existing_work_order.status,
@@ -101,11 +143,24 @@ export const UpdateWorkOrderStatus = async (req: Request, res: Response) => {
       }
     });
 
+    if (assigned_to_id && assigned_to_id !== existing_work_order.assigned_to_id) {
+      const staff_user = await prisma.user.findFirst({
+        where: { id: assigned_to_id }
+      });
+      if (staff_user) {
+        await sendAssignmentEmail(
+          staff_user.email, 
+          staff_user.name, 
+          updated_work_order.description
+        );
+      }
+    }
+
     sendResponse(
       res, 
       200, 
       true, 
-      "Work order updated successfully!", 
+      "Work order updated successfully and technician notified!", 
       updated_work_order
     );
   } catch (error: any) {

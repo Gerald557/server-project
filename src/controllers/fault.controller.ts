@@ -53,7 +53,7 @@ export const ValidateFault = async (req: Request, res: Response) => {
     const { status, inspection_id } = req.body;
 
     if (status !== "open" && status !== "rejected") {
-      sendResponse(res, 422, false, "Invalid status change! Please approve ('open') or deny ('rejected') the fault.");
+      sendResponse(res, 400, false, "Invalid status change! Please approve ('open') or deny ('rejected') the fault.");
       return;
     }
 
