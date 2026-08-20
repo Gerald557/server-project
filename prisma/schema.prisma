@@ -105,7 +105,7 @@ model Payment {
 
 model LedgerEntry {
   id               Int      @id @default(autoincrement())
-  payment_id       Int
+  payment_id       Int?
   amount           Float
   transaction_type String 
   description      String 

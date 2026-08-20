@@ -1,10 +1,8 @@
-
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { sendResponse } from '../utils/response';
 import { create_payment_schema, update_payment_status_schema } from '../validators/payment.validator';
-
-const prismaClient = prisma as any;
+import { create_ledger_entry_schema } from '../validators/ledger.validator';
 
 export const CreatePayment = async (req: Request, res: Response) => {
   try {
@@ -18,7 +16,7 @@ export const CreatePayment = async (req: Request, res: Response) => {
 
     const { invoice_id } = scan_result.data;
 
-    const existing_invoice = await prismaClient.invoice.findUnique({
+    const existing_invoice = await prisma.invoice.findUnique({
       where: { id: invoice_id }
     });
 
@@ -27,7 +25,7 @@ export const CreatePayment = async (req: Request, res: Response) => {
       return;
     }
 
-    const existing_payment = await prismaClient.payment.findUnique({
+    const existing_payment = await prisma.payment.findUnique({
       where: { invoice_id }
     });
 
@@ -36,7 +34,7 @@ export const CreatePayment = async (req: Request, res: Response) => {
       return;
     }
 
-    const new_payment = await prismaClient.payment.create({
+    const new_payment = await prisma.payment.create({
       data: {
         invoice_id,
         amount: existing_invoice.total_amount,
@@ -44,13 +42,7 @@ export const CreatePayment = async (req: Request, res: Response) => {
       }
     });
 
-    sendResponse(
-      res, 
-      201, 
-      true, 
-      "Payment session initiated successfully!", 
-      new_payment
-    );
+    sendResponse(res, 201, true, "Payment session initiated successfully!", new_payment);
   } catch (error: any) {
     sendResponse(res, 500, false, error.message);
   }
@@ -59,7 +51,7 @@ export const CreatePayment = async (req: Request, res: Response) => {
 
 export const GetPayments = async (req: Request, res: Response) => {
   try {
-    const all_payments = await prismaClient.payment.findMany();
+    const all_payments = await prisma.payment.findMany();
     sendResponse(res, 200, true, "Payments retrieved successfully!", all_payments);
   } catch (error: any) {
     sendResponse(res, 500, false, error.message);
@@ -84,7 +76,7 @@ export const UpdatePaymentStatus = async (req: Request, res: Response) => {
 
     const { status } = scan_result.data;
 
-    const existing_payment = await prismaClient.payment.findUnique({
+    const existing_payment = await prisma.payment.findUnique({
       where: { id: parsed_id }
     });
 
@@ -98,7 +90,7 @@ export const UpdatePaymentStatus = async (req: Request, res: Response) => {
       return;
     }
 
-    const updated_payment = await prismaClient.payment.update({
+    const updated_payment = await prisma.payment.update({
       where: { id: parsed_id },
       data: {
         status,
@@ -107,29 +99,74 @@ export const UpdatePaymentStatus = async (req: Request, res: Response) => {
     });
 
     if (status === "successful") {
-      
-      await prismaClient.ledgerEntry.create({
+      await prisma.ledgerEntry.create({
+        data: {
+          payment_id: parsed_id,
+          amount: updated_payment.amount,
+          transaction_type: "DEBIT",
+          description: `Debit: Invoice paid - Payment cleared successfully for Invoice ID ${existing_payment.invoice_id}`
+        }
+      });
+
+      await prisma.invoice.update({
+        where: { id: existing_payment.invoice_id },
+        data: { status: "paid" }
+      });
+    } else if (status === "reversed") {
+   
+      await prisma.ledgerEntry.create({
         data: {
           payment_id: parsed_id,
           amount: updated_payment.amount,
           transaction_type: "CREDIT",
-          description: `Revenue recognized: Payment cleared successfully for Invoice ID ${existing_payment.invoice_id}`
+          description: `Credit: Failed payment reversed for Invoice ID ${existing_payment.invoice_id}`
         }
-      });
-
-      await prismaClient.invoice.update({
-        where: { id: existing_payment.invoice_id },
-        data: { status: "paid" }
       });
     }
 
-    sendResponse(
-      res, 
-      200, 
-      true, 
-      `Payment status updated successfully to ${status}!`, 
-      updated_payment
-    );
+    sendResponse(res, 200, true, `Payment status updated successfully to ${status}!`, updated_payment);
+  } catch (error: any) {
+    sendResponse(res, 500, false, error.message);
+  }
+};
+
+export const CreateLedgerEntry = async (req: Request, res: Response) => {
+  try {
+    const scan_result = create_ledger_entry_schema.safeParse(req.body);
+
+    if (!scan_result.success) {
+      const first_error_message = scan_result.error.issues[0].message;
+      sendResponse(res, 422, false, first_error_message);
+      return;
+    }
+
+    const { amount, transaction_type, description } = scan_result.data;
+    
+    const raw_payment_id = req.body.payment_id;
+    let parsed_payment_id: number;
+
+    if (raw_payment_id === undefined || raw_payment_id === null) {
+      sendResponse(res, 422, false, "A valid payment ID must be provided!");
+      return;
+    }
+
+    parsed_payment_id = Number(raw_payment_id);
+    if (!Number.isInteger(parsed_payment_id) || parsed_payment_id <= 0) {
+      sendResponse(res, 422, false, "A valid payment ID must be a positive integer!");
+      return;
+    }
+
+    const ledger_entry_data = {
+      amount,
+      transaction_type,
+      description: `${transaction_type === "CREDIT" ? "Credit" : "Debit"}: ${description}`
+    };
+
+    const new_entry = await prisma.ledgerEntry.create({
+      data: { ...ledger_entry_data, payment_id: parsed_payment_id }
+    });
+
+    sendResponse(res, 201, true, "Ledger transaction recorded in books successfully!", new_entry);
   } catch (error: any) {
     sendResponse(res, 500, false, error.message);
   }
@@ -137,8 +174,37 @@ export const UpdatePaymentStatus = async (req: Request, res: Response) => {
 
 export const GetLedgerEntries = async (req: Request, res: Response) => {
   try {
-    const ledger_entries = await prismaClient.ledgerEntry.findMany();
+    const ledger_entries = await prisma.ledgerEntry.findMany({
+      orderBy: { created_at: 'desc' }
+    });
     sendResponse(res, 200, true, "Immutable ledger entries retrieved successfully!", ledger_entries);
+  } catch (error: any) {
+    sendResponse(res, 500, false, error.message);
+  }
+};
+
+export const GetWalletBalance = async (req: Request, res: Response) => {
+  try {
+    const entries = await prisma.ledgerEntry.findMany();
+
+    let total_credits = 0;
+    let total_debits = 0;
+
+    for (const entry of entries) {
+      if (entry.transaction_type === "CREDIT") {
+        total_credits += entry.amount;
+      } else if (entry.transaction_type === "DEBIT") {
+        total_debits += entry.amount;
+      }
+    }
+
+    const active_balance = total_credits - total_debits;
+
+    sendResponse(res, 200, true, "Active wallet balance compiled successfully!", {
+      total_credits,
+      total_debits,
+      active_wallet_balance: active_balance
+    });
   } catch (error: any) {
     sendResponse(res, 500, false, error.message);
   }
