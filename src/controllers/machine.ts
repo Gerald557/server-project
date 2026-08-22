@@ -2,7 +2,8 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { sendResponse } from '../utils/response';
-import { create_machine_schema } from '../validators/machine.validator'
+import { create_machine_schema } from '../validators/machine'
+import { logAuditEvent } from '../utils/audit';
 
 export const CreateMachine = async (req: Request, res: Response) => {
   try {
@@ -31,6 +32,12 @@ export const CreateMachine = async (req: Request, res: Response) => {
         updated_at: new Date()
       }
     });
+    
+    await logAuditEvent(
+      staff_id, 
+      "CREATE_MACHINE", 
+      `Staff member ID ${staff_id} successfully registered new machine: ${new_machine.name} (Serial: ${new_machine.serial_number})`
+    );
 
     sendResponse(
       res, 

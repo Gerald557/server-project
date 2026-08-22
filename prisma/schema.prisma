@@ -61,3 +61,61 @@ model WorkOrder {
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
 }
+
+
+model SparePart {
+  id                  Int      @id @default(autoincrement())
+  name                String   
+  part_number         String   @unique
+  quantity_in_stock   Int      
+  low_stock_threshold Int      @default(5)
+  unit_cost           Float    
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+}
+
+model WorkOrderPart {
+  id            Int      @id @default(autoincrement())
+  work_order_id Int      
+  spare_part_id Int      
+  quantity_used Int      
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model Invoice {
+  id            Int      @id @default(autoincrement())
+  work_order_id Int      @unique 
+  labor_cost    Float    @default(100.0)
+  parts_cost    Float    
+  total_amount  Float    
+  status        String   @default("draft")
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model Payment {
+  id         Int      @id @default(autoincrement())
+  invoice_id Int      @unique 
+  amount     Float   
+  status     String   @default("pending")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model LedgerEntry {
+  id               Int      @id @default(autoincrement())
+  payment_id       Int?
+  amount           Float
+  transaction_type String 
+  description      String 
+  created_at       DateTime @default(now())
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  user_id    Int     
+  action     String  
+  details    String  
+  created_at DateTime @default(now())
+}

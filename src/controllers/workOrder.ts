@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { sendResponse } from '../utils/response';
-import { create_work_order_schema } from '../validators/work_order.validator';
+import { create_work_order_schema } from '../validators/workOrder';
 import nodemailer from 'nodemailer'; 
 
 const sendAssignmentEmail = async (email: string, name: string, description: string) => {

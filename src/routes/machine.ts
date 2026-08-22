@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { CreateMachine, GetMachines, UpdateMachine } from '../controllers/machine.controller';
+import { CreateMachine, GetMachines, UpdateMachine } from '../controllers/machine';
 import { verifyToken } from '../middlewares/auth';
 
 const router = Router();
