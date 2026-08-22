@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { CreateInspection, GetInspections, UpdateInspection } from '../controllers/inspection.controller';
+import { CreateInspection, GetInspections, UpdateInspection } from '../controllers/inspection';
 import { verifyToken } from '../middlewares/auth';
 
 const router = Router();

@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { sendResponse } from '../utils/response';
-import { create_payment_schema, update_payment_status_schema } from '../validators/payment.validator';
-import { create_ledger_entry_schema } from '../validators/ledger.validator';
+import { create_payment_schema, update_payment_status_schema } from '../validators/payment';
+import { create_ledger_entry_schema } from '../validators/ledger';
 
 export const CreatePayment = async (req: Request, res: Response) => {
   try {

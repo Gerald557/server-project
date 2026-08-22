@@ -111,3 +111,11 @@ model LedgerEntry {
   description      String 
   created_at       DateTime @default(now())
 }
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  user_id    Int     
+  action     String  
+  details    String  
+  created_at DateTime @default(now())
+}

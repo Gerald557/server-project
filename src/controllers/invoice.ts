@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { sendResponse } from '../utils/response';
-import { create_invoice_schema, update_invoice_status_schema } from '../validators/invoice.validator';
+import { create_invoice_schema, update_invoice_status_schema } from '../validators/invoice';
 
 const prismaClient = prisma as any;
 

@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { CreateFault, GetFaults, ValidateFault } from '../controllers/fault.controller';
+import { CreateFault, GetFaults, ValidateFault } from '../controllers/fault';
 import { verifyToken } from '../middlewares/auth';
 
 const router = Router();

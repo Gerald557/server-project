@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { CreateSparePart, GetSpareParts, AddPartToWorkOrder } from '../controllers/spare_part.controller';
+import { CreateSparePart, GetSpareParts, AddPartToWorkOrder } from '../controllers/sparePart';
 import { verifyToken } from '../middlewares/auth';
 
 const router = Router();

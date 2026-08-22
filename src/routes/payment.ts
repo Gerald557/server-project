@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { CreatePayment, GetPayments, UpdatePaymentStatus, CreateLedgerEntry, GetLedgerEntries, GetWalletBalance } from '../controllers/payment.controller';
+import { CreatePayment, GetPayments, UpdatePaymentStatus, CreateLedgerEntry, GetLedgerEntries, GetWalletBalance } from '../controllers/payment';
 import { verifyToken } from '../middlewares/auth';
 
 const router = Router();

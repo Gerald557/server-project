@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { CreateWorkOrder, GetWorkOrders, UpdateWorkOrderStatus } from '../controllers/work_order.controller';
+import { CreateWorkOrder, GetWorkOrders, UpdateWorkOrderStatus } from '../controllers/workOrder';
 import { verifyToken } from '../middlewares/auth';
 
 const router = Router();

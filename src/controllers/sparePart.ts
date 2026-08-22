@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { sendResponse } from '../utils/response';
-import { create_spare_part_schema, add_part_to_work_order_schema } from '../validators/spare_part.validator';
+import { create_spare_part_schema, add_part_to_work_order_schema } from '../validators/sparePart';
 import nodemailer from 'nodemailer';
 
 const prismaClient = prisma as any;
